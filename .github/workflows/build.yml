@@ -1,0 +1,63 @@
+name: Build Pyspin Binaries
+
+on:
+  push:
+    tags:
+      - "v*"   # Exemple : v1.0.0
+  workflow_dispatch:   # Permet de lancer manuellement
+
+jobs:
+  build:
+    name: Build for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: pyspin-linux
+          - os: macos-latest
+            artifact_name: pyspin-macos
+          - os: windows-latest
+            artifact_name: pyspin.exe
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install PyInstaller
+        run: pip install pyinstaller
+
+      - name: Build executable
+        run: |
+          pyinstaller --onefile pyspin.py --name "${{ matrix.artifact_name }}"
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: dist/${{ matrix.artifact_name }}
+
+  release:
+    name: Publish Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/pyspin-linux/pyspin-linux
+            dist/pyspin-macos/pyspin-macos
+            dist/pyspin.exe/pyspin.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
