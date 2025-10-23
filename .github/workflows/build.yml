@@ -37,15 +37,25 @@ jobs:
       - name: Install PyInstaller
         run: pip install pyinstaller
 
-      - name: Inject version and build
+      - name: Detect version (tag or default)
+        id: get_version
         run: |
-          VERSION=${GITHUB_REF#refs/tags/}
-          echo "__version__ = \"${VERSION}\"" > pyspin/version.py
-          pyinstaller --onefile pyspin/__main__.py --name "pyspin"
+          if git describe --tags --abbrev=0 > /dev/null 2>&1; then
+            VERSION=$(git describe --tags --abbrev=0)
+          else
+            VERSION="0.0.0-dev"
+          fi
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "Detected version: ${VERSION}"
 
-      - name: Build executable
+      - name: Inject version into source
+        run: echo "__version__ = '${VERSION}'" > pyspin/version.py
+
+      - name: Build binary
         run: |
-          pyinstaller --onefile pyspin.py --name "${{ matrix.artifact_name }}"
+          pyinstaller --onefile pyspin/main.py --name pyspin
+          mkdir -p dist/out
+          mv dist/pyspin dist/out/
       
       - name: Upload artifact
         uses: actions/upload-artifact@v4
