@@ -37,6 +37,12 @@ jobs:
       - name: Install PyInstaller
         run: pip install pyinstaller
 
+      - name: Inject version and build
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "__version__ = \"${VERSION}\"" > pyspin/version.py
+          pyinstaller --onefile pyspin/__main__.py --name "pyspin"
+
       - name: Build executable
         run: |
           pyinstaller --onefile pyspin.py --name "${{ matrix.artifact_name }}"
@@ -62,8 +68,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/pyspin-linux/pyspin-linux
-            dist/pyspin-macos/pyspin-macos
+            dist/pyspin-linux/pyspin
+            dist/pyspin-macos/pyspin
             dist/pyspin.exe/pyspin.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

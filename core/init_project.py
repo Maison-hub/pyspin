@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os
 
-def main():
+def init_project():
     dockerfile = """\
 FROM python:3.11-slim
 
@@ -39,6 +39,3 @@ services:
             f.write(compose)
 
     print("✅ Dockerfile and compose.yml created !")
-
-if __name__ == "__main__":
-    main()

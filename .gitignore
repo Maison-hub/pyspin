@@ -1,2 +1,67 @@
+# === Python ===
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.spec
+
+# Installer scripts
+version.py
+# (Ce fichier est généré automatiquement dans pyspin/version.py par GitHub Actions)
+pyspin/version.py
+
+# Logs and caches
+*.log
+*.tmp
+*.bak
+*.swp
+.DS_Store
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Coverage / test
+.coverage
+.tox/
+.nox/
+htmlcov/
+.pytest_cache/
+
+# OS / Editor
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# === PyInstaller ===
+# PyInstaller outputs
+pyspin.spec
+# Temporary build files
+__pycache__/
+# Cache from PyInstaller
+*.manifest
+*.dll
+*.pkg
+*.app
+*.exe
+*.bin
+
+# === Docker ===
+*.tar
+*.pid
+*.sock
+
+# === Misc ===
+# Ignore local test files or generated Dockerfiles
 Dockerfile
-compose.yml
+docker-compose.yml
