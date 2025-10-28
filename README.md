@@ -15,4 +15,4 @@ No setup, no hassle — just **run and code**.
 
 ## 🧩 Installation
 
-Soon 👀
+curl -fsSL https://raw.githubusercontent.com/maison-hub/pyspin/main/install.sh | bash
