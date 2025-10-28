@@ -49,7 +49,9 @@ jobs:
           echo "Detected version: ${VERSION}"
 
       - name: Inject version into source
-        run: echo "__version__ = '${VERSION}'" > pyspin/version.py
+        run: |
+          mkdir -p pyspin
+          echo "__version__ = '${VERSION}'" > pyspin/version.py
 
       - name: Build binary
         run: |
