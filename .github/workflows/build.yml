@@ -13,6 +13,11 @@ permissions:
 
 jobs:
   build:
+    # Use src/pyspin as working directory so all run steps operate on the package sources
+    defaults:
+      run:
+        working-directory: /pyspin
+
     name: Build for ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -49,15 +54,16 @@ jobs:
           echo "Detected version: ${VERSION}"
 
       - name: Inject version into source
+        # we are in src/pyspin, write directly to version.py
         run: |
-          mkdir -p pyspin
-          echo "__version__ = '${VERSION}'" > pyspin/version.py
+          echo "__version__ = '${VERSION}'" > version.py
 
       - name: Build binary
         run: |
-          pyinstaller --onefile pyspin/main.py --name pyspin
-          mkdir -p dist/out
-          mv dist/pyspin dist/out/
+          # use the package __main__.py as the entrypoint (exists: src/pyspin/__main__.py)
+          pyinstaller --onefile __main__.py --name pyspin
+          mkdir -p dist/${{ matrix.artifact_name }}
+          mv dist/pyspin dist/${{ matrix.artifact_name }}/
       
       - name: Upload artifact
         uses: actions/upload-artifact@v4
