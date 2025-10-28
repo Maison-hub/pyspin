@@ -2,11 +2,11 @@ name: Build Pyspin Binaries
 
 on:
   push:
-    tags:
-      - "v*.*.*"
     branches:
       - main
-  workflow_dispatch:   
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -37,28 +37,25 @@ jobs:
       - name: Install PyInstaller
         run: pip install pyinstaller
 
-      - name: Detect version (tag or default)
-        id: get_version
+      - name: Determine version
+        id: version
         run: |
-          if git describe --tags --abbrev=0 > /dev/null 2>&1; then
-            VERSION=$(git describe --tags --abbrev=0)
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            echo "VERSION=${GITHUB_REF_NAME}" >> $GITHUB_ENV
           else
-            VERSION="0.0.0-dev"
+            echo "VERSION=dev" >> $GITHUB_ENV
           fi
-          echo "VERSION=${VERSION}" >> $GITHUB_ENV
-          echo "Detected version: ${VERSION}"
+          echo "Using version: ${VERSION}"
 
       - name: Inject version into source
         run: |
           mkdir -p pyspin
           echo "__version__ = '${VERSION}'" > pyspin/version.py
 
-      - name: Build binary
+      - name: Build executable
         run: |
-          pyinstaller --onefile pyspin/__main__.py --name pyspin
-          mkdir -p dist/out
-          mv dist/pyspin dist/out/
-      
+          pyinstaller --onefile pyspin.py --name "${{ matrix.artifact_name }}"
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -69,7 +66,7 @@ jobs:
     name: Publish Release
     needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')  # Do not realease when no tags present
+    if: startsWith(github.ref, 'refs/tags/')  # ❗ n’exécute que sur un tag
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -80,8 +77,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/pyspin-linux/pyspin
-            dist/pyspin-macos/pyspin
+            dist/pyspin-linux/pyspin-linux
+            dist/pyspin-macos/pyspin-macos
             dist/pyspin.exe/pyspin.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
